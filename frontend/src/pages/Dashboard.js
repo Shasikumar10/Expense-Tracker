@@ -5,7 +5,7 @@ import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const userEmail = localStorage.getItem("userEmail") || "Unknown User"; // ✅ userEmail setup
+  const userEmail = localStorage.getItem("userEmail") || "Unknown User";
   const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState([]);
@@ -15,6 +15,7 @@ const Dashboard = () => {
     category: "",
     note: "",
     date: new Date().toISOString().substr(0, 10),
+    isRecurring: false, // ✅ New field added
   });
   const [budget, setBudget] = useState(10000);
   const [editMode, setEditMode] = useState(false);
@@ -52,6 +53,7 @@ const Dashboard = () => {
         category: "",
         note: "",
         date: new Date().toISOString().substr(0, 10),
+        isRecurring: false,
       });
       fetchTransactions();
     } catch (err) {
@@ -66,6 +68,7 @@ const Dashboard = () => {
       category: t.category,
       note: t.note,
       date: t.date.substring(0, 10),
+      isRecurring: t.isRecurring || false, // handle undefined
     });
     setEditId(t._id);
     setEditMode(true);
@@ -167,6 +170,21 @@ const Dashboard = () => {
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
 
+        {/* ✅ New Recurring Checkbox */}
+        <label>
+          <input
+            type="checkbox"
+            checked={form.isRecurring}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                isRecurring: e.target.checked,
+              })
+            }
+          />
+          Recurring Monthly
+        </label>
+
         <button type="submit">{editMode ? "Update" : "Add"}</button>
 
         {editMode && (
@@ -181,6 +199,7 @@ const Dashboard = () => {
                 category: "",
                 note: "",
                 date: new Date().toISOString().substr(0, 10),
+                isRecurring: false,
               });
             }}
           >
@@ -198,6 +217,7 @@ const Dashboard = () => {
             <th>Amount</th>
             <th>Category</th>
             <th>Note</th>
+            <th>Recurring</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -209,6 +229,7 @@ const Dashboard = () => {
               <td>₹{t.amount}</td>
               <td>{t.category}</td>
               <td>{t.note}</td>
+              <td>{t.isRecurring ? "✅" : "—"}</td>
               <td>
                 <button onClick={() => handleEdit(t)}>Edit</button>
                 <button onClick={() => handleDelete(t._id)}>Delete</button>
