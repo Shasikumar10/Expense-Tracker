@@ -12,7 +12,10 @@ const Dashboard = () => {
     note: "",
     date: new Date().toISOString().substr(0, 10),
   });
-  const [budget, setBudget] = useState(10000); // default budget
+  const [budget, setBudget] = useState(10000);
+  const [editMode, setEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   const navigate = useNavigate();
 
   const fetchTransactions = async () => {
@@ -30,10 +33,17 @@ const Dashboard = () => {
     fetchTransactions();
   }, []);
 
-  const handleAdd = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/transactions", form);
+      if (editMode) {
+        await API.put(`/transactions/${editId}`, form);
+        setEditMode(false);
+        setEditId(null);
+      } else {
+        await API.post("/transactions", form);
+      }
+
       setForm({
         type: "expense",
         amount: "",
@@ -43,8 +53,21 @@ const Dashboard = () => {
       });
       fetchTransactions();
     } catch (err) {
-      alert("Failed to add transaction");
+      alert("Failed to save transaction");
     }
+  };
+
+  const handleEdit = (t) => {
+    setForm({
+      type: t.type,
+      amount: t.amount,
+      category: t.category,
+      note: t.note,
+      date: t.date.substring(0, 10),
+    });
+    setEditId(t._id);
+    setEditMode(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
@@ -102,7 +125,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <form className="transaction-form" onSubmit={handleAdd}>
+      <form className="transaction-form" onSubmit={handleSubmit}>
         <select
           value={form.type}
           onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -140,7 +163,26 @@ const Dashboard = () => {
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
 
-        <button type="submit">Add</button>
+        <button type="submit">{editMode ? "Update" : "Add"}</button>
+
+        {editMode && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditMode(false);
+              setEditId(null);
+              setForm({
+                type: "expense",
+                amount: "",
+                category: "",
+                note: "",
+                date: new Date().toISOString().substr(0, 10),
+              });
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       <h3>Your Transactions</h3>
@@ -164,6 +206,7 @@ const Dashboard = () => {
               <td>{t.category}</td>
               <td>{t.note}</td>
               <td>
+                <button onClick={() => handleEdit(t)}>Edit</button>
                 <button onClick={() => handleDelete(t._id)}>Delete</button>
               </td>
             </tr>

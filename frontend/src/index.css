@@ -118,3 +118,16 @@ button {
   font-weight: bold;
   margin-top: 10px;
 }
+td button {
+  margin: 2px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+td button:first-child {
+  background-color: #2196f3;
+}
+
+td button:last-child {
+  background-color: crimson;
+}
