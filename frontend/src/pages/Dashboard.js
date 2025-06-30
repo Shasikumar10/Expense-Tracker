@@ -1,8 +1,7 @@
-// src/pages/Dashboard.js
+import Charts from "../components/Charts";
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
-import Charts from "../components/Charts";
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -13,7 +12,7 @@ const Dashboard = () => {
     note: "",
     date: new Date().toISOString().substr(0, 10),
   });
-
+  const [budget, setBudget] = useState(10000); // default budget
   const navigate = useNavigate();
 
   const fetchTransactions = async () => {
@@ -68,6 +67,9 @@ const Dashboard = () => {
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
 
+  const spendingPercent = ((totalExpense / budget) * 100).toFixed(1);
+  const isOverBudget = totalExpense > budget;
+
   return (
     <div className="dashboard">
       <h2>Welcome to Expense Tracker</h2>
@@ -79,8 +81,26 @@ const Dashboard = () => {
         <h3>Balance: ₹{totalIncome - totalExpense}</h3>
       </div>
 
-      {/* ✅ This was the issue — now placed inside return */}
-      {transactions.length > 0 && <Charts transactions={transactions} />}
+      <div className="budget-section">
+        <h3>Monthly Budget: ₹{budget}</h3>
+        <input
+          type="number"
+          value={budget}
+          onChange={(e) => setBudget(Number(e.target.value))}
+          placeholder="Set Budget"
+        />
+        <div className="progress-bar">
+          <div
+            className={`progress-fill ${isOverBudget ? "over" : ""}`}
+            style={{ width: `${Math.min(spendingPercent, 100)}%` }}
+          >
+            {spendingPercent}%
+          </div>
+        </div>
+        {isOverBudget && (
+          <p className="alert">⚠️ You've exceeded your monthly budget!</p>
+        )}
+      </div>
 
       <form className="transaction-form" onSubmit={handleAdd}>
         <select
@@ -150,6 +170,8 @@ const Dashboard = () => {
           ))}
         </tbody>
       </table>
+
+      {transactions.length > 0 && <Charts transactions={transactions} />}
     </div>
   );
 };
