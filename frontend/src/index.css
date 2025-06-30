@@ -1,17 +1,63 @@
-.auth {
-  width: 300px;
-  margin: 100px auto;
+body {
+  font-family: sans-serif;
+  background: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard {
+  max-width: 800px;
+  margin: 30px auto;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px #ccc;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard h2 {
   text-align: center;
 }
-.auth input {
-  width: 90%;
-  margin: 10px 0;
+
+.summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.transaction-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.transaction-form input,
+.transaction-form select {
+  flex: 1;
   padding: 8px;
 }
-.auth button {
+
+.transaction-form button {
   padding: 10px 15px;
-  margin-top: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+button {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
 }
