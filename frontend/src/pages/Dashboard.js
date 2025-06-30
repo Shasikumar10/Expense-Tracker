@@ -15,11 +15,27 @@ const Dashboard = () => {
     category: "",
     note: "",
     date: new Date().toISOString().substr(0, 10),
-    isRecurring: false, // ✅ New field added
+    isRecurring: false,
   });
+
   const [budget, setBudget] = useState(10000);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+
+  // ✅ Currency & Exchange Rate Setup
+  const [currency, setCurrency] = useState("INR");
+  const [rates, setRates] = useState({});
+
+  useEffect(() => {
+    fetch("https://api.exchangerate.host/latest?base=INR")
+      .then((res) => res.json())
+      .then((data) => setRates(data.rates));
+  }, []);
+
+  const getConverted = (amount) => {
+    if (!rates[currency]) return amount;
+    return (amount * rates[currency]).toFixed(2);
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -68,7 +84,7 @@ const Dashboard = () => {
       category: t.category,
       note: t.note,
       date: t.date.substring(0, 10),
-      isRecurring: t.isRecurring || false, // handle undefined
+      isRecurring: t.isRecurring || false,
     });
     setEditId(t._id);
     setEditMode(true);
@@ -105,10 +121,28 @@ const Dashboard = () => {
       <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
       <button onClick={handleLogout}>Logout</button>
 
+      {/* ✅ Currency Selector */}
+      <div className="currency-selector">
+        <label>Select Currency:</label>
+        <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+          {["INR", "USD", "EUR", "GBP", "JPY", "CAD"].map((cur) => (
+            <option value={cur} key={cur}>
+              {cur}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="summary">
-        <h3>Total Income: ₹{totalIncome}</h3>
-        <h3>Total Expense: ₹{totalExpense}</h3>
-        <h3>Balance: ₹{totalIncome - totalExpense}</h3>
+        <h3>
+          Total Income: {currency} ₹{getConverted(totalIncome)}
+        </h3>
+        <h3>
+          Total Expense: {currency} ₹{getConverted(totalExpense)}
+        </h3>
+        <h3>
+          Balance: {currency} ₹{getConverted(totalIncome - totalExpense)}
+        </h3>
       </div>
 
       <div className="budget-section">
@@ -170,7 +204,6 @@ const Dashboard = () => {
           onChange={(e) => setForm({ ...form, date: e.target.value })}
         />
 
-        {/* ✅ New Recurring Checkbox */}
         <label>
           <input
             type="checkbox"
@@ -226,7 +259,9 @@ const Dashboard = () => {
             <tr key={t._id}>
               <td>{t.date.substring(0, 10)}</td>
               <td>{t.type}</td>
-              <td>₹{t.amount}</td>
+              <td>
+                {currency} ₹{getConverted(t.amount)}
+              </td>
               <td>{t.category}</td>
               <td>{t.note}</td>
               <td>{t.isRecurring ? "✅" : "—"}</td>
@@ -240,7 +275,6 @@ const Dashboard = () => {
       </table>
 
       {transactions.length > 0 && <Charts transactions={transactions} />}
-
       {transactions.length > 0 && (
         <PdfReport transactions={transactions} userEmail={userEmail} />
       )}

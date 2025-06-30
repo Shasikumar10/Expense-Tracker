@@ -19,7 +19,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* Updated summary section using new style as budget-section */
+/* Summary Section */
 .summary {
   display: flex;
   justify-content: space-around;
@@ -29,6 +29,12 @@ body {
   border-radius: 10px;
 }
 
+/* Budget Section */
+.budget-section {
+  margin-bottom: 30px;
+}
+
+/* Form Layout */
 .transaction-form {
   display: flex;
   flex-wrap: wrap;
@@ -41,8 +47,17 @@ body {
   padding: 8px;
   flex: 1;
   min-width: 150px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
+.transaction-form label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Form Button */
 .transaction-form button {
   padding: 10px 15px;
   background: #007bff;
@@ -52,7 +67,25 @@ body {
   border-radius: 5px;
 }
 
-/* Transaction Table */
+.transaction-form button:hover {
+  background: #0056b3;
+}
+
+/* General Button Style */
+button {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Table Styles */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -66,17 +99,21 @@ table td {
   text-align: center;
 }
 
-/* General button style for delete, logout, etc. */
-button {
-  background: crimson;
-  color: white;
-  border: none;
+td button {
+  margin: 2px;
   padding: 5px 10px;
-  border-radius: 5px;
   cursor: pointer;
 }
 
-/* Chart Section Styled Like Budget */
+td button:first-child {
+  background-color: #2196f3;
+}
+
+td button:last-child {
+  background-color: crimson;
+}
+
+/* Charts Section */
 .charts {
   margin-top: 40px;
   background: #eef2f7;
@@ -89,7 +126,7 @@ button {
   color: #333;
 }
 
-/* New: Progress Bar Style */
+/* Progress Bar */
 .progress-bar {
   margin: 10px 0;
   background: #ddd;
@@ -112,22 +149,21 @@ button {
   background: crimson;
 }
 
-/* New: Alert messages */
+/* Alert Message */
 .alert {
   color: crimson;
   font-weight: bold;
   margin-top: 10px;
 }
-td button {
-  margin: 2px;
-  padding: 5px 10px;
-  cursor: pointer;
+
+/* Currency Selector */
+.currency-selector {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-td button:first-child {
-  background-color: #2196f3;
-}
-
-td button:last-child {
-  background-color: crimson;
+.currency-selector label {
+  font-weight: bold;
 }
