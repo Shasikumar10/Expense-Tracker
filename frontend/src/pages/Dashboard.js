@@ -24,7 +24,16 @@ const Dashboard = () => {
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ Currency
+  // 🔊 Voice recognition
+  const [isListening, setIsListening] = useState(false);
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  // 🌐 Currency & Rates
   const [currency, setCurrency] = useState("INR");
   const [rates, setRates] = useState({});
 
@@ -108,6 +117,7 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  // 📷 OCR Handling
   const handleOCR = async (file) => {
     if (!file) return;
     setUploading(true);
@@ -140,6 +150,47 @@ const Dashboard = () => {
     }
 
     setUploading(false);
+  };
+
+  // 🎤 Voice Input Handling
+  const handleVoiceInput = () => {
+    recognition.start();
+    setIsListening(true);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Voice Input:", transcript);
+      setIsListening(false);
+
+      const amountMatch = transcript.match(/(\d{2,6}(\.\d{1,2})?)/);
+      const categoryMatch = transcript.match(
+        /(food|travel|bills|rent|shopping|health|grocery|fuel|misc)/i
+      );
+      const dateMatch = transcript.match(
+        /\d{1,2}(st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
+      );
+
+      const extractedAmount = amountMatch ? parseFloat(amountMatch[1]) : "";
+      const extractedCategory = categoryMatch
+        ? categoryMatch[0].toLowerCase()
+        : "";
+      const today = new Date();
+
+      setForm((prev) => ({
+        ...prev,
+        amount: extractedAmount || prev.amount,
+        category: extractedCategory || prev.category,
+        date: prev.date || today.toISOString().substr(0, 10),
+      }));
+
+      alert("✅ Voice input processed.");
+    };
+
+    recognition.onerror = (e) => {
+      console.error("Voice error:", e);
+      setIsListening(false);
+      alert("❌ Voice input failed.");
+    };
   };
 
   const totalIncome = transactions
@@ -206,7 +257,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* OCR Image Upload */}
+      {/* OCR Upload */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="file"
@@ -269,6 +320,10 @@ const Dashboard = () => {
 
         <button type="submit">{editMode ? "Update" : "Add"}</button>
 
+        <button type="button" onClick={handleVoiceInput}>
+          🎤 Speak Transaction
+        </button>
+
         {editMode && (
           <button
             type="button"
@@ -289,6 +344,10 @@ const Dashboard = () => {
           </button>
         )}
       </form>
+
+      {isListening && (
+        <p>🎙️ Listening... Speak like "500 travel on June 5"</p>
+      )}
 
       <h3>Your Transactions</h3>
       <table>

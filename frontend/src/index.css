@@ -8,7 +8,7 @@ body {
 
 p {
   font-style: italic;
-  color: gray;
+  color: #444;
 }
 
 /* Dashboard Container */
@@ -111,6 +111,7 @@ input[type="file"] {
   gap: 5px;
 }
 
+/* Transaction Form Button */
 .transaction-form button {
   padding: 10px 15px;
   background: #007bff;
@@ -139,6 +140,21 @@ button:hover {
   opacity: 0.9;
 }
 
+/* Voice/Mic Button */
+button[type="button"] {
+  background-color: #ff9800;
+  color: white;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button[type="button"]:hover {
+  background-color: #e68900;
+}
+
 /* Table Styles */
 table {
   width: 100%;
@@ -158,6 +174,7 @@ td button {
   margin: 2px;
   padding: 5px 10px;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 td button:first-child {
