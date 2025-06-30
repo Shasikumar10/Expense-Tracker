@@ -3,6 +3,7 @@ import PdfReport from "../components/PdfReport";
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import Tesseract from "tesseract.js";
 
 const Dashboard = () => {
   const userEmail = localStorage.getItem("userEmail") || "Unknown User";
@@ -21,8 +22,9 @@ const Dashboard = () => {
   const [budget, setBudget] = useState(10000);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  // ✅ Currency & Exchange Rate Setup
+  // ✅ Currency
   const [currency, setCurrency] = useState("INR");
   const [rates, setRates] = useState({});
 
@@ -44,6 +46,7 @@ const Dashboard = () => {
     } catch (err) {
       alert("Session expired, please log in again.");
       localStorage.removeItem("token");
+      localStorage.removeItem("userEmail");
       navigate("/login");
     }
   };
@@ -71,6 +74,7 @@ const Dashboard = () => {
         date: new Date().toISOString().substr(0, 10),
         isRecurring: false,
       });
+
       fetchTransactions();
     } catch (err) {
       alert("Failed to save transaction");
@@ -104,6 +108,40 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  const handleOCR = async (file) => {
+    if (!file) return;
+    setUploading(true);
+
+    try {
+      const result = await Tesseract.recognize(file, "eng", {
+        logger: (m) => console.log(m),
+      });
+
+      const text = result.data.text;
+      console.log("OCR Result:", text);
+
+      const amountMatch = text.match(/(?:Rs\.?|₹|\$)?\s?(\d{2,6}(\.\d{1,2})?)/i);
+      const dateMatch = text.match(/\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/);
+
+      const extractedAmount = amountMatch ? parseFloat(amountMatch[1]) : "";
+      const extractedDate = dateMatch ? dateMatch[0].replaceAll("-", "/") : "";
+
+      setForm((prev) => ({
+        ...prev,
+        amount: extractedAmount || prev.amount,
+        date:
+          extractedDate || prev.date || new Date().toISOString().substr(0, 10),
+      }));
+
+      alert("✅ Text extracted from image.");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to read image.");
+    }
+
+    setUploading(false);
+  };
+
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -118,10 +156,12 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <h2>Welcome to Expense Tracker</h2>
-      <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
+      <p style={{ fontSize: "14px", color: "gray" }}>
+        Logged in as: {userEmail}
+      </p>
       <button onClick={handleLogout}>Logout</button>
 
-      {/* ✅ Currency Selector */}
+      {/* Currency Selector */}
       <div className="currency-selector">
         <label>Select Currency:</label>
         <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
@@ -166,6 +206,16 @@ const Dashboard = () => {
         )}
       </div>
 
+      {/* OCR Image Upload */}
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => handleOCR(e.target.files[0])}
+        />
+        {uploading && <p>⏳ Scanning image...</p>}
+      </div>
+
       <form className="transaction-form" onSubmit={handleSubmit}>
         <select
           value={form.type}
@@ -180,7 +230,9 @@ const Dashboard = () => {
           placeholder="Amount"
           required
           value={form.amount}
-          onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+          onChange={(e) =>
+            setForm({ ...form, amount: Number(e.target.value) })
+          }
         />
 
         <input
@@ -209,10 +261,7 @@ const Dashboard = () => {
             type="checkbox"
             checked={form.isRecurring}
             onChange={(e) =>
-              setForm({
-                ...form,
-                isRecurring: e.target.checked,
-              })
+              setForm({ ...form, isRecurring: e.target.checked })
             }
           />
           Recurring Monthly

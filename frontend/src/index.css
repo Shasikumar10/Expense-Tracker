@@ -1,3 +1,4 @@
+/* Global Styles */
 body {
   font-family: sans-serif;
   background: #f9f9f9;
@@ -5,6 +6,12 @@ body {
   padding: 0;
 }
 
+p {
+  font-style: italic;
+  color: gray;
+}
+
+/* Dashboard Container */
 .dashboard {
   max-width: 800px;
   margin: 30px auto;
@@ -32,98 +39,6 @@ body {
 /* Budget Section */
 .budget-section {
   margin-bottom: 30px;
-}
-
-/* Form Layout */
-.transaction-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.transaction-form input,
-.transaction-form select {
-  padding: 8px;
-  flex: 1;
-  min-width: 150px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.transaction-form label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* Form Button */
-.transaction-form button {
-  padding: 10px 15px;
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.transaction-form button:hover {
-  background: #0056b3;
-}
-
-/* General Button Style */
-button {
-  background: crimson;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-/* Table Styles */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-table th,
-table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
-}
-
-td button {
-  margin: 2px;
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-td button:first-child {
-  background-color: #2196f3;
-}
-
-td button:last-child {
-  background-color: crimson;
-}
-
-/* Charts Section */
-.charts {
-  margin-top: 40px;
-  background: #eef2f7;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-.charts h3 {
-  margin: 20px 0 10px;
-  color: #333;
 }
 
 /* Progress Bar */
@@ -166,4 +81,102 @@ td button:last-child {
 
 .currency-selector label {
   font-weight: bold;
+}
+
+/* File Upload Input */
+input[type="file"] {
+  margin-top: 10px;
+}
+
+/* Transaction Form */
+.transaction-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.transaction-form input,
+.transaction-form select {
+  padding: 8px;
+  flex: 1;
+  min-width: 150px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.transaction-form label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.transaction-form button {
+  padding: 10px 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.transaction-form button:hover {
+  background: #0056b3;
+}
+
+/* General Button Style */
+button {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+/* Table Action Buttons */
+td button {
+  margin: 2px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+td button:first-child {
+  background-color: #2196f3;
+}
+
+td button:last-child {
+  background-color: crimson;
+}
+
+/* Charts Section */
+.charts {
+  margin-top: 40px;
+  background: #eef2f7;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.charts h3 {
+  margin: 20px 0 10px;
+  color: #333;
 }
