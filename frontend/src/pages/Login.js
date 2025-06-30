@@ -12,9 +12,10 @@ const Login = () => {
     try {
       const res = await API.post("/auth/login", form);
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userEmail", res.data.user.email); // ✅ Store email
       navigate("/");
     } catch (err) {
-      alert(err.response.data.msg || "Login failed");
+      alert(err.response?.data?.msg || "Login failed");
     }
   };
 
@@ -22,12 +23,22 @@ const Login = () => {
     <div className="auth">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <input type="email" placeholder="Email" required
-               onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <input type="password" placeholder="Password" required
-               onChange={(e) => setForm({ ...form, password: e.target.value })} />
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
         <button type="submit">Login</button>
-        <p>Don’t have an account? <Link to="/register">Register</Link></p>
+        <p>
+          Don’t have an account? <Link to="/register">Register</Link>
+        </p>
       </form>
     </div>
   );

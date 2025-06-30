@@ -1,9 +1,13 @@
 import Charts from "../components/Charts";
+import PdfReport from "../components/PdfReport";
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const userEmail = localStorage.getItem("userEmail") || "Unknown User"; // ✅ userEmail setup
+  const navigate = useNavigate();
+
   const [transactions, setTransactions] = useState([]);
   const [form, setForm] = useState({
     type: "expense",
@@ -15,8 +19,6 @@ const Dashboard = () => {
   const [budget, setBudget] = useState(10000);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
-
-  const navigate = useNavigate();
 
   const fetchTransactions = async () => {
     try {
@@ -79,6 +81,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
     navigate("/login");
   };
 
@@ -96,6 +99,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <h2>Welcome to Expense Tracker</h2>
+      <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
       <button onClick={handleLogout}>Logout</button>
 
       <div className="summary">
@@ -215,6 +219,10 @@ const Dashboard = () => {
       </table>
 
       {transactions.length > 0 && <Charts transactions={transactions} />}
+
+      {transactions.length > 0 && (
+        <PdfReport transactions={transactions} userEmail={userEmail} />
+      )}
     </div>
   );
 };
