@@ -61,3 +61,13 @@ button {
   border: none;
   padding: 5px 10px;
 }
+.charts {
+  margin-top: 40px;
+  background: #f1f3f5;
+  padding: 20px;
+  border-radius: 10px;
+}
+.charts h3 {
+  margin: 20px 0 10px;
+  color: #333;
+}

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { useNavigate } from "react-router-dom";
+import Charts from "../components/Charts";
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -77,6 +78,9 @@ const Dashboard = () => {
         <h3>Total Expense: ₹{totalExpense}</h3>
         <h3>Balance: ₹{totalIncome - totalExpense}</h3>
       </div>
+
+      {/* ✅ This was the issue — now placed inside return */}
+      {transactions.length > 0 && <Charts transactions={transactions} />}
 
       <form className="transaction-form" onSubmit={handleAdd}>
         <select
