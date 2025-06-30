@@ -1,13 +1,14 @@
-import Charts from "../components/Charts";
-import PdfReport from "../components/PdfReport";
 import { useEffect, useState } from "react";
-import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import Tesseract from "tesseract.js";
+import Charts from "../components/Charts";
+import PdfReport from "../components/PdfReport";
+import API from "../services/api"; // Axios instance with token interceptor (optional)
 
 const Dashboard = () => {
-  const userEmail = localStorage.getItem("userEmail") || "Unknown User";
   const navigate = useNavigate();
+  const userEmail = localStorage.getItem("userEmail") || "Unknown User";
+  const token = localStorage.getItem("token");
 
   const [transactions, setTransactions] = useState([]);
   const [form, setForm] = useState({
@@ -18,14 +19,14 @@ const Dashboard = () => {
     date: new Date().toISOString().substr(0, 10),
     isRecurring: false,
   });
-
   const [budget, setBudget] = useState(10000);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
-
-  // 🔊 Voice recognition
   const [isListening, setIsListening] = useState(false);
+  const [currency, setCurrency] = useState("INR");
+  const [rates, setRates] = useState({});
+
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
@@ -33,9 +34,11 @@ const Dashboard = () => {
   recognition.continuous = false;
   recognition.interimResults = false;
 
-  // 🌐 Currency & Rates
-  const [currency, setCurrency] = useState("INR");
-  const [rates, setRates] = useState({});
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
   useEffect(() => {
     fetch("https://api.exchangerate.host/latest?base=INR")
@@ -50,10 +53,11 @@ const Dashboard = () => {
 
   const fetchTransactions = async () => {
     try {
-      const res = await API.get("/transactions");
+      const res = await API.get("/transactions", config);
       setTransactions(res.data);
     } catch (err) {
-      alert("Session expired, please log in again.");
+      console.error(err);
+      alert("Session expired. Please log in again.");
       localStorage.removeItem("token");
       localStorage.removeItem("userEmail");
       navigate("/login");
@@ -68,13 +72,12 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       if (editMode) {
-        await API.put(`/transactions/${editId}`, form);
+        await API.put(`/transactions/${editId}`, form, config);
         setEditMode(false);
         setEditId(null);
       } else {
-        await API.post("/transactions", form);
+        await API.post("/transactions", form, config);
       }
-
       setForm({
         type: "expense",
         amount: "",
@@ -83,30 +86,29 @@ const Dashboard = () => {
         date: new Date().toISOString().substr(0, 10),
         isRecurring: false,
       });
-
       fetchTransactions();
     } catch (err) {
-      alert("Failed to save transaction");
+      alert("❌ Failed to save transaction.");
     }
   };
 
-  const handleEdit = (t) => {
+  const handleEdit = (txn) => {
     setForm({
-      type: t.type,
-      amount: t.amount,
-      category: t.category,
-      note: t.note,
-      date: t.date.substring(0, 10),
-      isRecurring: t.isRecurring || false,
+      type: txn.type,
+      amount: txn.amount,
+      category: txn.category,
+      note: txn.note,
+      date: txn.date.substring(0, 10),
+      isRecurring: txn.isRecurring || false,
     });
-    setEditId(t._id);
+    setEditId(txn._id);
     setEditMode(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this transaction?")) {
-      await API.delete(`/transactions/${id}`);
+      await API.delete(`/transactions/${id}`, config);
       fetchTransactions();
     }
   };
@@ -117,46 +119,35 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  // 📷 OCR Handling
   const handleOCR = async (file) => {
     if (!file) return;
     setUploading(true);
-
     try {
       const result = await Tesseract.recognize(file, "eng", {
         logger: (m) => console.log(m),
       });
-
       const text = result.data.text;
       console.log("OCR Result:", text);
-
       const amountMatch = text.match(/(?:Rs\.?|₹|\$)?\s?(\d{2,6}(\.\d{1,2})?)/i);
       const dateMatch = text.match(/\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/);
-
       const extractedAmount = amountMatch ? parseFloat(amountMatch[1]) : "";
       const extractedDate = dateMatch ? dateMatch[0].replaceAll("-", "/") : "";
-
       setForm((prev) => ({
         ...prev,
         amount: extractedAmount || prev.amount,
-        date:
-          extractedDate || prev.date || new Date().toISOString().substr(0, 10),
+        date: extractedDate || prev.date,
       }));
-
       alert("✅ Text extracted from image.");
     } catch (err) {
       console.error(err);
       alert("❌ Failed to read image.");
     }
-
     setUploading(false);
   };
 
-  // 🎤 Voice Input Handling
   const handleVoiceInput = () => {
     recognition.start();
     setIsListening(true);
-
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       console.log("Voice Input:", transcript);
@@ -174,15 +165,14 @@ const Dashboard = () => {
       const extractedCategory = categoryMatch
         ? categoryMatch[0].toLowerCase()
         : "";
-      const today = new Date();
 
+      const today = new Date();
       setForm((prev) => ({
         ...prev,
         amount: extractedAmount || prev.amount,
         category: extractedCategory || prev.category,
         date: prev.date || today.toISOString().substr(0, 10),
       }));
-
       alert("✅ Voice input processed.");
     };
 
@@ -207,17 +197,14 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <h2>Welcome to Expense Tracker</h2>
-      <p style={{ fontSize: "14px", color: "gray" }}>
-        Logged in as: {userEmail}
-      </p>
+      <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
       <button onClick={handleLogout}>Logout</button>
 
-      {/* Currency Selector */}
       <div className="currency-selector">
         <label>Select Currency:</label>
         <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
           {["INR", "USD", "EUR", "GBP", "JPY", "CAD"].map((cur) => (
-            <option value={cur} key={cur}>
+            <option key={cur} value={cur}>
               {cur}
             </option>
           ))}
@@ -225,15 +212,9 @@ const Dashboard = () => {
       </div>
 
       <div className="summary">
-        <h3>
-          Total Income: {currency} ₹{getConverted(totalIncome)}
-        </h3>
-        <h3>
-          Total Expense: {currency} ₹{getConverted(totalExpense)}
-        </h3>
-        <h3>
-          Balance: {currency} ₹{getConverted(totalIncome - totalExpense)}
-        </h3>
+        <h3>Total Income: {currency} ₹{getConverted(totalIncome)}</h3>
+        <h3>Total Expense: {currency} ₹{getConverted(totalExpense)}</h3>
+        <h3>Balance: {currency} ₹{getConverted(totalIncome - totalExpense)}</h3>
       </div>
 
       <div className="budget-section">
@@ -252,12 +233,9 @@ const Dashboard = () => {
             {spendingPercent}%
           </div>
         </div>
-        {isOverBudget && (
-          <p className="alert">⚠️ You've exceeded your monthly budget!</p>
-        )}
+        {isOverBudget && <p className="alert">⚠️ Budget exceeded!</p>}
       </div>
 
-      {/* OCR Upload */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="file"
@@ -319,7 +297,6 @@ const Dashboard = () => {
         </label>
 
         <button type="submit">{editMode ? "Update" : "Add"}</button>
-
         <button type="button" onClick={handleVoiceInput}>
           🎤 Speak Transaction
         </button>
@@ -345,9 +322,7 @@ const Dashboard = () => {
         )}
       </form>
 
-      {isListening && (
-        <p>🎙️ Listening... Speak like "500 travel on June 5"</p>
-      )}
+      {isListening && <p>🎙️ Listening... Say: "500 grocery on June 5"</p>}
 
       <h3>Your Transactions</h3>
       <table>

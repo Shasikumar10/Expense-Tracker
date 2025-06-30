@@ -1,4 +1,4 @@
-/* Global Styles */
+/* ================= GLOBAL STYLES ================= */
 body {
   font-family: sans-serif;
   background: #f9f9f9;
@@ -11,7 +11,21 @@ p {
   color: #444;
 }
 
-/* Dashboard Container */
+button {
+  background: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* ================= DASHBOARD CONTAINER ================= */
 .dashboard {
   max-width: 800px;
   margin: 30px auto;
@@ -26,7 +40,7 @@ p {
   margin-bottom: 20px;
 }
 
-/* Summary Section */
+/* ================= SUMMARY SECTION ================= */
 .summary {
   display: flex;
   justify-content: space-around;
@@ -36,7 +50,7 @@ p {
   border-radius: 10px;
 }
 
-/* Budget Section */
+/* ================= BUDGET SECTION ================= */
 .budget-section {
   margin-bottom: 30px;
 }
@@ -71,7 +85,7 @@ p {
   margin-top: 10px;
 }
 
-/* Currency Selector */
+/* ================= CURRENCY SELECTOR ================= */
 .currency-selector {
   margin: 20px 0;
   display: flex;
@@ -83,12 +97,12 @@ p {
   font-weight: bold;
 }
 
-/* File Upload Input */
+/* ================= FILE UPLOAD ================= */
 input[type="file"] {
   margin-top: 10px;
 }
 
-/* Transaction Form */
+/* ================= TRANSACTION FORM ================= */
 .transaction-form {
   display: flex;
   flex-wrap: wrap;
@@ -111,7 +125,7 @@ input[type="file"] {
   gap: 5px;
 }
 
-/* Transaction Form Button */
+/* Form Buttons */
 .transaction-form button {
   padding: 10px 15px;
   background: #007bff;
@@ -125,22 +139,7 @@ input[type="file"] {
   background: #0056b3;
 }
 
-/* General Button Style */
-button {
-  background: crimson;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-/* Voice/Mic Button */
+/* Mic / Voice Button */
 button[type="button"] {
   background-color: #ff9800;
   color: white;
@@ -155,7 +154,7 @@ button[type="button"]:hover {
   background-color: #e68900;
 }
 
-/* Table Styles */
+/* ================= TRANSACTION TABLE ================= */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -169,7 +168,7 @@ table td {
   text-align: center;
 }
 
-/* Table Action Buttons */
+/* Table Buttons */
 td button {
   margin: 2px;
   padding: 5px 10px;
@@ -185,7 +184,7 @@ td button:last-child {
   background-color: crimson;
 }
 
-/* Charts Section */
+/* ================= CHARTS SECTION ================= */
 .charts {
   margin-top: 40px;
   background: #eef2f7;
@@ -196,4 +195,47 @@ td button:last-child {
 .charts h3 {
   margin: 20px 0 10px;
   color: #333;
+}
+
+/* ================= AUTH FORM ================= */
+.auth-form {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fefefe;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0077ff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.auth-form button:hover {
+  background-color: #005fcc;
+}
+
+.auth-form p {
+  text-align: center;
+}
+
+.auth-form a {
+  color: #0077ff;
+  text-decoration: none;
 }

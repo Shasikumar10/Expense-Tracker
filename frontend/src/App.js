@@ -1,20 +1,30 @@
-// src/App.js
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+// frontend/src/App.js
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard"; // we'll add this later
+import Signup from "./pages/Signup";
+import PrivateRoute from "./components/PrivateRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
-  const token = localStorage.getItem("token");
-
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={token ? <Dashboard /> : <Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
