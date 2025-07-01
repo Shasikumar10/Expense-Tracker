@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Tesseract from "tesseract.js";
 import Charts from "../components/Charts";
 import PdfReport from "../components/PdfReport";
-import API from "../services/api"; // Axios instance with token interceptor (optional)
+import API from "../services/api";
+import { AuthContext } from "../context/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { logoutUser } = useContext(AuthContext);
+
   const userEmail = localStorage.getItem("userEmail") || "Unknown User";
   const token = localStorage.getItem("token");
 
@@ -40,6 +43,14 @@ const Dashboard = () => {
     },
   };
 
+  // Prevent back navigation
+  useEffect(() => {
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = () => {
+      window.history.go(1);
+    };
+  }, []);
+
   useEffect(() => {
     fetch("https://api.exchangerate.host/latest?base=INR")
       .then((res) => res.json())
@@ -60,6 +71,7 @@ const Dashboard = () => {
       alert("Session expired. Please log in again.");
       localStorage.removeItem("token");
       localStorage.removeItem("userEmail");
+      logoutUser();
       navigate("/login");
     }
   };
@@ -113,12 +125,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-    navigate("/login");
-  };
-
   const handleOCR = async (file) => {
     if (!file) return;
     setUploading(true);
@@ -127,7 +133,6 @@ const Dashboard = () => {
         logger: (m) => console.log(m),
       });
       const text = result.data.text;
-      console.log("OCR Result:", text);
       const amountMatch = text.match(/(?:Rs\.?|₹|\$)?\s?(\d{2,6}(\.\d{1,2})?)/i);
       const dateMatch = text.match(/\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/);
       const extractedAmount = amountMatch ? parseFloat(amountMatch[1]) : "";
@@ -150,15 +155,11 @@ const Dashboard = () => {
     setIsListening(true);
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      console.log("Voice Input:", transcript);
       setIsListening(false);
 
       const amountMatch = transcript.match(/(\d{2,6}(\.\d{1,2})?)/);
       const categoryMatch = transcript.match(
         /(food|travel|bills|rent|shopping|health|grocery|fuel|misc)/i
-      );
-      const dateMatch = transcript.match(
-        /\d{1,2}(st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
       );
 
       const extractedAmount = amountMatch ? parseFloat(amountMatch[1]) : "";
@@ -196,9 +197,28 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
+      <button
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          padding: "10px 15px",
+          backgroundColor: "#ff4d4d",
+          color: "white",
+          border: "none",
+          borderRadius: 4,
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          logoutUser();
+          window.location.href = "/login";
+        }}
+      >
+        Logout
+      </button>
+
       <h2>Welcome to Expense Tracker</h2>
       <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
-      <button onClick={handleLogout}>Logout</button>
 
       <div className="currency-selector">
         <label>Select Currency:</label>
@@ -259,9 +279,7 @@ const Dashboard = () => {
           placeholder="Amount"
           required
           value={form.amount}
-          onChange={(e) =>
-            setForm({ ...form, amount: Number(e.target.value) })
-          }
+          onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
         />
 
         <input
@@ -289,9 +307,7 @@ const Dashboard = () => {
           <input
             type="checkbox"
             checked={form.isRecurring}
-            onChange={(e) =>
-              setForm({ ...form, isRecurring: e.target.checked })
-            }
+            onChange={(e) => setForm({ ...form, isRecurring: e.target.checked })}
           />
           Recurring Monthly
         </label>
@@ -342,9 +358,7 @@ const Dashboard = () => {
             <tr key={t._id}>
               <td>{t.date.substring(0, 10)}</td>
               <td>{t.type}</td>
-              <td>
-                {currency} ₹{getConverted(t.amount)}
-              </td>
+              <td>{currency} ₹{getConverted(t.amount)}</td>
               <td>{t.category}</td>
               <td>{t.note}</td>
               <td>{t.isRecurring ? "✅" : "—"}</td>

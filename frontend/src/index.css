@@ -1,4 +1,4 @@
-/* ================= GLOBAL STYLES ================= */
+/* ========== GLOBAL STYLES ========== */
 body {
   font-family: sans-serif;
   background: #f9f9f9;
@@ -25,7 +25,7 @@ button:hover {
   opacity: 0.9;
 }
 
-/* ================= DASHBOARD CONTAINER ================= */
+/* ========== DASHBOARD CONTAINER ========== */
 .dashboard {
   max-width: 800px;
   margin: 30px auto;
@@ -40,7 +40,7 @@ button:hover {
   margin-bottom: 20px;
 }
 
-/* ================= SUMMARY SECTION ================= */
+/* ========== SUMMARY SECTION ========== */
 .summary {
   display: flex;
   justify-content: space-around;
@@ -50,7 +50,7 @@ button:hover {
   border-radius: 10px;
 }
 
-/* ================= BUDGET SECTION ================= */
+/* ========== BUDGET SECTION ========== */
 .budget-section {
   margin-bottom: 30px;
 }
@@ -85,7 +85,7 @@ button:hover {
   margin-top: 10px;
 }
 
-/* ================= CURRENCY SELECTOR ================= */
+/* ========== CURRENCY SELECTOR ========== */
 .currency-selector {
   margin: 20px 0;
   display: flex;
@@ -97,12 +97,12 @@ button:hover {
   font-weight: bold;
 }
 
-/* ================= FILE UPLOAD ================= */
+/* ========== FILE UPLOAD ========== */
 input[type="file"] {
   margin-top: 10px;
 }
 
-/* ================= TRANSACTION FORM ================= */
+/* ========== TRANSACTION FORM ========== */
 .transaction-form {
   display: flex;
   flex-wrap: wrap;
@@ -154,7 +154,7 @@ button[type="button"]:hover {
   background-color: #e68900;
 }
 
-/* ================= TRANSACTION TABLE ================= */
+/* ========== TRANSACTION TABLE ========== */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -168,7 +168,6 @@ table td {
   text-align: center;
 }
 
-/* Table Buttons */
 td button {
   margin: 2px;
   padding: 5px 10px;
@@ -184,7 +183,7 @@ td button:last-child {
   background-color: crimson;
 }
 
-/* ================= CHARTS SECTION ================= */
+/* ========== CHARTS SECTION ========== */
 .charts {
   margin-top: 40px;
   background: #eef2f7;
@@ -197,7 +196,7 @@ td button:last-child {
   color: #333;
 }
 
-/* ================= AUTH FORM ================= */
+/* ========== AUTH FORM ========== */
 .auth-form {
   max-width: 400px;
   margin: 50px auto;
@@ -238,4 +237,24 @@ td button:last-child {
 .auth-form a {
   color: #0077ff;
   text-decoration: none;
+}
+
+/* ========== TRANSACTION LIST (LEGACY) ========== */
+.transaction-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.transaction-list li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Legacy income/expense styles */
+.income {
+  color: green;
+}
+
+.expense {
+  color: red;
 }
