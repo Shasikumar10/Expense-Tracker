@@ -5,6 +5,7 @@ import Charts from "../components/Charts";
 import PdfReport from "../components/PdfReport";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
+import ChartSection from "../components/ChartSection"; // Make sure this exists
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -370,6 +371,9 @@ const Dashboard = () => {
           ))}
         </tbody>
       </table>
+
+      {/* ChartSection Added Here */}
+      {transactions.length > 0 && <ChartSection transactions={transactions} />}
 
       {transactions.length > 0 && <Charts transactions={transactions} />}
       {transactions.length > 0 && (

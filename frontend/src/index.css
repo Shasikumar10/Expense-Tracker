@@ -55,7 +55,6 @@ button:hover {
   margin-bottom: 30px;
 }
 
-/* Progress Bar */
 .progress-bar {
   margin: 10px 0;
   background: #ddd;
@@ -78,7 +77,6 @@ button:hover {
   background: crimson;
 }
 
-/* Alert Message */
 .alert {
   color: crimson;
   font-weight: bold;
@@ -125,7 +123,7 @@ input[type="file"] {
   gap: 5px;
 }
 
-/* Form Buttons */
+/* Buttons inside the form */
 .transaction-form button {
   padding: 10px 15px;
   background: #007bff;
@@ -139,7 +137,7 @@ input[type="file"] {
   background: #0056b3;
 }
 
-/* Mic / Voice Button */
+/* Mic / Voice Button Styling */
 button[type="button"] {
   background-color: #ff9800;
   color: white;
@@ -183,15 +181,18 @@ td button:last-child {
   background-color: crimson;
 }
 
-/* ========== CHARTS SECTION ========== */
-.charts {
-  margin-top: 40px;
-  background: #eef2f7;
+/* ========== CHARTS & CHART SECTION ========== */
+.charts,
+.chart-section {
+  margin-top: 50px;
   padding: 20px;
+  background-color: #f6f8fa;
   border-radius: 10px;
+  box-shadow: 0 0 10px #ccc;
 }
 
-.charts h3 {
+.charts h3,
+.chart-section h3 {
   margin: 20px 0 10px;
   color: #333;
 }
@@ -239,7 +240,7 @@ td button:last-child {
   text-decoration: none;
 }
 
-/* ========== TRANSACTION LIST (LEGACY) ========== */
+/* ========== LEGACY TRANSACTION LIST ========== */
 .transaction-list {
   list-style-type: none;
   padding: 0;
@@ -250,7 +251,7 @@ td button:last-child {
   border-bottom: 1px solid #ccc;
 }
 
-/* Legacy income/expense styles */
+/* Income/Expense colors */
 .income {
   color: green;
 }
