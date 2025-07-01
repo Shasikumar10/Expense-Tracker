@@ -2,10 +2,12 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Tesseract from "tesseract.js";
 import Charts from "../components/Charts";
-import PdfReport from "../components/PdfReport";
+import PdfReport from "../components/PdfReport"; // Optional
+import ChartSection from "../components/ChartSection";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
-import ChartSection from "../components/ChartSection"; // Make sure this exists
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,6 +26,11 @@ const Dashboard = () => {
     isRecurring: false,
   });
   const [budget, setBudget] = useState(10000);
+  const [monthlyBudget, setMonthlyBudget] = useState(() => {
+    return localStorage.getItem("budget")
+      ? parseInt(localStorage.getItem("budget"))
+      : 0;
+  });
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -44,7 +51,6 @@ const Dashboard = () => {
     },
   };
 
-  // Prevent back navigation
   useEffect(() => {
     window.history.pushState(null, null, window.location.href);
     window.onpopstate = () => {
@@ -68,7 +74,6 @@ const Dashboard = () => {
       const res = await API.get("/transactions", config);
       setTransactions(res.data);
     } catch (err) {
-      console.error(err);
       alert("Session expired. Please log in again.");
       localStorage.removeItem("token");
       localStorage.removeItem("userEmail");
@@ -145,7 +150,6 @@ const Dashboard = () => {
       }));
       alert("✅ Text extracted from image.");
     } catch (err) {
-      console.error(err);
       alert("❌ Failed to read image.");
     }
     setUploading(false);
@@ -179,10 +183,39 @@ const Dashboard = () => {
     };
 
     recognition.onerror = (e) => {
-      console.error("Voice error:", e);
       setIsListening(false);
       alert("❌ Voice input failed.");
     };
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Expense Report", 14, 22);
+    doc.setFontSize(12);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+    const tableColumn = ["Date", "Type", "Amount", "Category", "Note"];
+    const tableRows = [];
+
+    transactions.forEach((txn) => {
+      const txnData = [
+        new Date(txn.date).toLocaleDateString(),
+        txn.type,
+        `₹${txn.amount}`,
+        txn.category,
+        txn.note || "-",
+      ];
+      tableRows.push(txnData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+    });
+
+    doc.save("expense_report.pdf");
   };
 
   const totalIncome = transactions
@@ -192,6 +225,15 @@ const Dashboard = () => {
   const totalExpense = transactions
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentMonth = new Date().getMonth();
+  const totalSpent = transactions
+    .filter(
+      (txn) =>
+        new Date(txn.date).getMonth() === currentMonth &&
+        txn.type === "expense"
+    )
+    .reduce((acc, txn) => acc + txn.amount, 0);
 
   const spendingPercent = ((totalExpense / budget) * 100).toFixed(1);
   const isOverBudget = totalExpense > budget;
@@ -219,7 +261,9 @@ const Dashboard = () => {
       </button>
 
       <h2>Welcome to Expense Tracker</h2>
-      <p style={{ fontSize: "14px", color: "gray" }}>Logged in as: {userEmail}</p>
+      <p style={{ fontSize: "14px", color: "gray" }}>
+        Logged in as: {userEmail}
+      </p>
 
       <div className="currency-selector">
         <label>Select Currency:</label>
@@ -232,14 +276,88 @@ const Dashboard = () => {
         </select>
       </div>
 
+      <div style={{ margin: "20px 0" }}>
+        <label>
+          💰 Monthly Budget: ₹
+          <input
+            type="number"
+            value={monthlyBudget}
+            onChange={(e) => {
+              setMonthlyBudget(parseInt(e.target.value));
+              localStorage.setItem("budget", e.target.value);
+            }}
+            style={{
+              padding: "5px",
+              marginLeft: "10px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+            }}
+          />
+        </label>
+      </div>
+
+      {monthlyBudget > 0 && (
+        <div
+          style={{
+            padding: "10px",
+            backgroundColor: totalSpent > monthlyBudget ? "#ffcccc" : "#e6ffe6",
+            color: totalSpent > monthlyBudget ? "red" : "green",
+            marginBottom: "10px",
+            borderRadius: "4px",
+          }}
+        >
+          {totalSpent > monthlyBudget
+            ? `🚨 You have exceeded your budget! (Spent ₹${totalSpent})`
+            : `✅ You are within budget. (Spent ₹${totalSpent})`}
+        </div>
+      )}
+
+      <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: "5px" }}>📊 Budget Progress</div>
+        <div
+          style={{
+            background: "#ddd",
+            borderRadius: "4px",
+            height: "20px",
+            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              background: totalSpent > monthlyBudget ? "#f44336" : "#4caf50",
+              height: "100%",
+              width: `${
+                monthlyBudget
+                  ? Math.min((totalSpent / monthlyBudget) * 100, 100)
+                  : 0
+              }%`,
+              borderRadius: "4px",
+              textAlign: "right",
+              color: "#fff",
+              paddingRight: "5px",
+              fontSize: "12px",
+            }}
+          >
+            ₹{totalSpent}
+          </div>
+        </div>
+      </div>
+
       <div className="summary">
-        <h3>Total Income: {currency} ₹{getConverted(totalIncome)}</h3>
-        <h3>Total Expense: {currency} ₹{getConverted(totalExpense)}</h3>
-        <h3>Balance: {currency} ₹{getConverted(totalIncome - totalExpense)}</h3>
+        <h3>
+          Total Income: {currency} ₹{getConverted(totalIncome)}
+        </h3>
+        <h3>
+          Total Expense: {currency} ₹{getConverted(totalExpense)}
+        </h3>
+        <h3>
+          Balance: {currency} ₹
+          {getConverted(totalIncome - totalExpense)}
+        </h3>
       </div>
 
       <div className="budget-section">
-        <h3>Monthly Budget: ₹{budget}</h3>
+        <h3>Monthly Budget (Progress Bar Below): ₹{budget}</h3>
         <input
           type="number"
           value={budget}
@@ -308,7 +426,9 @@ const Dashboard = () => {
           <input
             type="checkbox"
             checked={form.isRecurring}
-            onChange={(e) => setForm({ ...form, isRecurring: e.target.checked })}
+            onChange={(e) =>
+              setForm({ ...form, isRecurring: e.target.checked })
+            }
           />
           Recurring Monthly
         </label>
@@ -359,7 +479,9 @@ const Dashboard = () => {
             <tr key={t._id}>
               <td>{t.date.substring(0, 10)}</td>
               <td>{t.type}</td>
-              <td>{currency} ₹{getConverted(t.amount)}</td>
+              <td>
+                {currency} ₹{getConverted(t.amount)}
+              </td>
               <td>{t.category}</td>
               <td>{t.note}</td>
               <td>{t.isRecurring ? "✅" : "—"}</td>
@@ -372,12 +494,12 @@ const Dashboard = () => {
         </tbody>
       </table>
 
-      {/* ChartSection Added Here */}
-      {transactions.length > 0 && <ChartSection transactions={transactions} />}
-
-      {transactions.length > 0 && <Charts transactions={transactions} />}
       {transactions.length > 0 && (
-        <PdfReport transactions={transactions} userEmail={userEmail} />
+        <>
+          <ChartSection transactions={transactions} />
+          <Charts transactions={transactions} />
+          <button onClick={exportToPDF}>📄 Download PDF Report</button>
+        </>
       )}
     </div>
   );
